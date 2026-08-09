@@ -38,7 +38,7 @@ function App() {
 
   useEffect(() => {
     const fetchData = () => {
-      axios.get('http://localhost:5000/api/fires')
+      axios.get(`${import.meta.env.VITE_API_URL}/api/fires`)
         .then((response) => {
           setFires(response.data);
           setLoading(false);
@@ -49,7 +49,7 @@ function App() {
           setLoading(false);
         });
 
-      axios.get('http://localhost:5000/api/fires/risk-zones')
+      axios.get(`${import.meta.env.VITE_API_URL}/api/fires/risk-zones`)
         .then((response) => {
           setRiskZones(response.data);
         })

@@ -19,7 +19,7 @@ function Auth({ onLoginSuccess }) {
     const endpoint = isLogin ? 'login' : 'signup';
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/auth/${endpoint}`, formData);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/${endpoint}`, formData);
 
       // Save token and user info in browser storage
       localStorage.setItem('token', response.data.token);

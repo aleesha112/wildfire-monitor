@@ -24,7 +24,7 @@ function ChatBot() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/chat/ask', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat/ask`, {
         question: userMessage
       });
       setMessages(prev => [...prev, { role: 'ai', text: response.data.answer }]);

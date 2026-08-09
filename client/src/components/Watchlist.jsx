@@ -9,7 +9,7 @@ function Watchlist({ onSelectRegion }) {
   const token = localStorage.getItem('token');
 
   const fetchWatchlist = () => {
-    axios.get('http://localhost:5000/api/watchlist', {
+    axios.get(`${import.meta.env.VITE_API_URL}/api/watchlist`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => setItems(res.data))
@@ -38,7 +38,7 @@ function Watchlist({ onSelectRegion }) {
 
       const { lat, lon } = geoRes.data[0];
 
-      const saveRes = await axios.post('http://localhost:5000/api/watchlist',
+      const saveRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/watchlist`,
         { regionName, latitude: parseFloat(lat), longitude: parseFloat(lon), radiusKm: 20 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -59,7 +59,7 @@ function Watchlist({ onSelectRegion }) {
 
   const removeRegion = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/watchlist/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/watchlist/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchWatchlist();
