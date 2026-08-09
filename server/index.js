@@ -22,9 +22,26 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected Successfully'))
-  .catch((err) => console.log('❌ MongoDB Connection Error:', err));
+let isConnected = false;
+
+async function connectDB() {
+  if (isConnected) return;
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    isConnected = true;
+    console.log('✅ MongoDB Connected Successfully');
+  } catch (err) {
+    console.log('❌ MongoDB Connection Error:', err);
+  }
+}
+
+connectDB();
+
+// Ensure DB is connected before handling any request (important for serverless)
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // Routes
 const fireRoutes = require('./routes/fireRoutes');
