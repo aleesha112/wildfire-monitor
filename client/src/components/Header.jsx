@@ -1,4 +1,4 @@
-function Header({ totalFires, lastUpdated, user, onLogout, onGoHome, onToggleSidebar }) {
+function Header({ totalFires, lastUpdated, user, onLogout, onGoHome, onToggleSidebar, timelapseActive, onToggleTimelapse }) {
   return (
     <header className="app-header">
       <button className="sidebar-toggle-btn" onClick={onToggleSidebar}>☰</button>
@@ -7,6 +7,9 @@ function Header({ totalFires, lastUpdated, user, onLogout, onGoHome, onToggleSid
         <h1>WILDFIRE<span className="accent">MONITOR</span></h1>
       </div>
       <div className="header-right">
+        <button className="navbar-timelapse-btn" onClick={onToggleTimelapse}>
+          {timelapseActive ? '✕ Exit Time-Lapse' : '⏱ Time-Lapse'}
+        </button>
         <span className="header-label">SOURCE</span>
         <span className="header-value">NASA VIIRS</span>
         <span className="divider">|</span>

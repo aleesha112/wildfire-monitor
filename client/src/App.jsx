@@ -9,6 +9,8 @@ import ChatBot from './components/ChatBot';
 import LandingPage from './components/LandingPage';
 import Auth from './components/Auth';
 import Watchlist from './components/Watchlist';
+import HistoricalSearch from './components/HistoricalSearch';
+import TimelapseSlider from './components/TimelapseSlider';
 
 function App() {
   const [fires, setFires] = useState([]);
@@ -23,8 +25,13 @@ function App() {
   const watchlistRef = useRef(null);
   const overviewRef = useRef(null);
   const chartRef = useRef(null);
+  const historicalRef = useRef(null);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [historicalFires, setHistoricalFires] = useState(null);
+  const [historicalDate, setHistoricalDate] = useState(null);
+  const [timelapseActive, setTimelapseActive] = useState(false);
+  const [timelapseFires, setTimelapseFires] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -32,37 +39,48 @@ function App() {
     setUser(null);
   };
 
+  const fetchLiveData = () => {
+    axios.get(`${import.meta.env.VITE_API_URL}/api/fires`)
+      .then((response) => {
+        setFires(response.data);
+        setLoading(false);
+        setLastUpdated(new Date().toLocaleTimeString());
+      })
+      .catch((error) => {
+        console.error('Error fetching fires:', error);
+        setLoading(false);
+      });
+
+    axios.get(`${import.meta.env.VITE_API_URL}/api/fires/risk-zones`)
+      .then((response) => {
+        setRiskZones(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching risk zones:', error);
+      });
+  };
+
+  const handleHistoricalResults = (fires, date) => {
+    setHistoricalFires(fires);
+    setHistoricalDate(date);
+
+    if (!fires && !date) {
+      fetchLiveData();
+    }
+  };
+
+  const handleTimelapseFilter = (filteredFires) => {
+    setTimelapseFires(filteredFires);
+  };
+
   const scrollToSection = (ref) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   useEffect(() => {
-    const fetchData = () => {
-      axios.get(`${import.meta.env.VITE_API_URL}/api/fires`)
-        .then((response) => {
-          setFires(response.data);
-          setLoading(false);
-          setLastUpdated(new Date().toLocaleTimeString());
-        })
-        .catch((error) => {
-          console.error('Error fetching fires:', error);
-          setLoading(false);
-        });
-
-      axios.get(`${import.meta.env.VITE_API_URL}/api/fires/risk-zones`)
-        .then((response) => {
-          setRiskZones(response.data);
-        })
-        .catch((error) => {
-          console.error('Error fetching risk zones:', error);
-        });
-    };
-
-    fetchData(); // fetch immediately on page load
-
-    const interval = setInterval(fetchData, 5 * 60 * 1000); // repeat every 5 minutes
-
-    return () => clearInterval(interval); // cleanup when component unmounts
+    fetchLiveData();
+    const interval = setInterval(fetchLiveData, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -88,15 +106,19 @@ function App() {
     return <Auth onLoginSuccess={setUser} />;
   }
 
+  const displayFires = timelapseActive ? (timelapseFires || []) : (historicalFires || fires);
+
   return (
     <div className="app">
       <Header
-        totalFires={fires.length}
+        totalFires={displayFires.length}
         lastUpdated={lastUpdated}
         user={user}
         onLogout={handleLogout}
         onGoHome={() => setShowLanding(true)}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        timelapseActive={timelapseActive}
+        onToggleTimelapse={() => setTimelapseActive(!timelapseActive)}
       />
       <div className="main-content">
         <aside className={sidebarOpen ? 'sidebar open' : 'sidebar'}>
@@ -104,6 +126,7 @@ function App() {
             <button onClick={() => scrollToSection(watchlistRef)}>My Watchlist</button>
             <button onClick={() => scrollToSection(overviewRef)}>Active Detections</button>
             <button onClick={() => scrollToSection(chartRef)}>Trend Chart</button>
+            <button onClick={() => scrollToSection(historicalRef)}>View by Date</button>
           </nav>
 
           <div className="sidebar-content">
@@ -111,16 +134,32 @@ function App() {
               <Watchlist onSelectRegion={setSelectedRegion} />
             </div>
             <div ref={overviewRef} className="sidebar-section">
-              <StatsPanel fires={fires} />
+              <StatsPanel fires={displayFires} />
             </div>
             <div ref={chartRef} className="sidebar-section">
-              <TrendChart fires={fires} />
+              <TrendChart fires={displayFires} />
+            </div>
+            <div ref={historicalRef} className="sidebar-section">
+              <HistoricalSearch onResults={handleHistoricalResults} />
             </div>
           </div>
         </aside>
         <div className="map-area">
           {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
-          <FireMap fires={fires} riskZones={riskZones} flyToRegion={selectedRegion} />
+          {timelapseActive && (
+            <TimelapseSlider
+              allFires={fires}
+              onFilteredFires={handleTimelapseFilter}
+              onExit={() => setTimelapseActive(false)}
+            />
+          )}
+          <FireMap
+            fires={displayFires}
+            riskZones={riskZones}
+            flyToRegion={selectedRegion}
+            isHistorical={!!historicalDate}
+            historicalDate={historicalDate}
+          />
         </div>
       </div>
       <ChatBot />

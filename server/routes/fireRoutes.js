@@ -117,4 +117,66 @@ router.get('/risk-zones', async (req, res) => {
     res.status(500).json({ error: 'Failed to calculate risk zones' });
   }
 });
+// Route: Get fire data for a specific historical date
+router.get('/historical', async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    if (!date) {
+      return res.status(400).json({ error: 'Date is required (format: YYYY-MM-DD)' });
+    }
+
+    const requestedDate = new Date(date);
+    const today = new Date();
+    if (requestedDate > today) {
+      return res.status(400).json({ error: 'Cannot fetch data for future dates' });
+    }
+
+    // Earliest supported date (MODIS archive goes back to Nov 2000)
+    const earliestDate = new Date('2000-11-01');
+    if (requestedDate < earliestDate) {
+      return res.status(400).json({ error: 'Data is not available before November 2000.' });
+    }
+
+    // Decide which satellite source to use based on how old the date is
+    const daysAgo = Math.floor((today - requestedDate) / (1000 * 60 * 60 * 24));
+    const MAP_KEY = process.env.FIRMS_API_KEY;
+
+    // Recent dates (last ~60 days): use VIIRS NOAA-20 NRT (higher resolution, current satellite)
+    // Older dates: use MODIS Standard Processing (archive, available back to 2000)
+    const source = daysAgo <= 60 ? 'VIIRS_NOAA20_NRT' : 'MODIS_SP';
+
+    const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${MAP_KEY}/${source}/60.5,23.5,77.5,37.5/1/${date}`;
+
+    const response = await axios.get(url);
+    const csvData = response.data;
+
+    const fires = [];
+    const stream = Readable.from(csvData);
+
+    stream
+      .pipe(csv())
+      .on('data', (row) => {
+        if (row.latitude && row.longitude) {
+          fires.push({
+            latitude: parseFloat(row.latitude),
+            longitude: parseFloat(row.longitude),
+            brightness: parseFloat(row.bright_ti4 || row.brightness),
+            confidence: row.confidence,
+            acquiredDate: row.acq_date,
+            acquiredTime: row.acq_time,
+            satellite: row.satellite || source
+          });
+        }
+      })
+      .on('end', () => {
+        res.json({ date, source, count: fires.length, fires });
+      });
+
+  } catch (error) {
+    console.error('Historical fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch historical data for this date. NASA archive may be temporarily unavailable.' });
+  }
+});
+
 module.exports = router;

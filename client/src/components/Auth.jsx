@@ -14,6 +14,15 @@ function Auth({ onLoginSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!isLogin) {
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        setError('Password must be at least 8 characters, with at least 1 uppercase letter and 1 number.');
+        return;
+      }
+    }
+
     setLoading(true);
 
     const endpoint = isLogin ? 'login' : 'signup';
@@ -68,6 +77,19 @@ function Auth({ onLoginSuccess }) {
             onChange={handleChange}
             required
           />
+          {!isLogin && formData.password && (
+            <div className="password-checklist">
+              <span className={formData.password.length >= 8 ? 'check-item valid' : 'check-item'}>
+                {formData.password.length >= 8 ? '✓' : '○'} At least 8 characters
+              </span>
+              <span className={/[A-Z]/.test(formData.password) ? 'check-item valid' : 'check-item'}>
+                {/[A-Z]/.test(formData.password) ? '✓' : '○'} One uppercase letter
+              </span>
+              <span className={/[0-9]/.test(formData.password) ? 'check-item valid' : 'check-item'}>
+                {/[0-9]/.test(formData.password) ? '✓' : '○'} One number
+              </span>
+            </div>
+          )}
 
           {error && <p className="auth-error">{error}</p>}
 

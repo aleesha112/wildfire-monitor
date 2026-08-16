@@ -13,7 +13,7 @@ const { Readable } = require('stream');
 const Fire = require('./models/Fire');
 const Watchlist = require('./models/Watchlist');
 const User = require('./models/User');
-const sendFireAlert = require('./utils/emailService');
+const { sendFireAlert } = require('./utils/emailService');
 
 const app = express();
 

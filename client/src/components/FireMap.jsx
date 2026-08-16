@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, GeoJSON, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
@@ -74,9 +74,11 @@ function FlyToRegion({ region, fires }) {
   return null;
 }
 
-function FireMap({ fires, riskZones, flyToRegion }){
+function FireMap({ fires, riskZones, flyToRegion, isHistorical, historicalDate }){
   const [theme, setTheme] = useState('light');
   const [pakistanBoundary, setPakistanBoundary] = useState(null);
+  const [newFireIds, setNewFireIds] = useState(new Set());
+  const prevFiresRef = useRef([]);
 
   useEffect(() => {
     axios.get('https://raw.githubusercontent.com/johan/world.geo.json/master/countries/PAK.geo.json')
@@ -86,6 +88,20 @@ function FireMap({ fires, riskZones, flyToRegion }){
       .catch((error) => console.error('Error loading boundary:', error));
   }, []);
 
+  useEffect(() => {
+    const prevIds = new Set(prevFiresRef.current.map((f) => f._id || `${f.latitude}-${f.longitude}`));
+    const currentIds = fires.map((f) => f._id || `${f.latitude}-${f.longitude}`);
+    const freshIds = currentIds.filter((id) => !prevIds.has(id));
+
+    if (freshIds.length > 0 && prevFiresRef.current.length > 0) {
+      setNewFireIds(new Set(freshIds));
+      const timer = setTimeout(() => setNewFireIds(new Set()), 8000);
+      return () => clearTimeout(timer);
+    }
+
+    prevFiresRef.current = fires;
+  }, [fires]);
+
   const getColor = (confidence) => {
     if (confidence === 'h') return '#ff4d4d';
     if (confidence === 'n') return '#ff9d42';
@@ -94,6 +110,11 @@ function FireMap({ fires, riskZones, flyToRegion }){
 
   return (
     <div className="map-wrapper">
+      {isHistorical && (
+        <div className="historical-banner">
+          📅 Viewing data for {historicalDate} — not live
+        </div>
+      )}
       <div className="theme-switcher">
         {Object.keys(MAP_THEMES).map((key) => (
           <button
@@ -159,30 +180,36 @@ function FireMap({ fires, riskZones, flyToRegion }){
   );
 })}
 
-        {fires.map((fire) => (
-          <CircleMarker
-            key={fire._id}
-            center={[fire.latitude, fire.longitude]}
-            radius={6}
-            pathOptions={{
-              color: getColor(fire.confidence),
-              fillColor: getColor(fire.confidence),
-              fillOpacity: 0.7,
-              weight: 1
-            }}
-          >
-            <Popup>
-              <div>
-                <strong>🔥 Fire Detected</strong><br />
-                Date: {fire.acquiredDate}<br />
-                Time: {fire.acquiredTime}<br />
-                Brightness: {fire.brightness}K<br />
-                Confidence: {fire.confidence}<br />
-                Satellite: {fire.satellite}
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
+        {fires.map((fire, index) => {
+          const fireId = fire._id || `${fire.latitude}-${fire.longitude}`;
+          const isNew = newFireIds.has(fireId);
+
+          return (
+            <CircleMarker
+              key={`${fireId}-${index}`}
+              center={[fire.latitude, fire.longitude]}
+              radius={isNew ? 10 : 6}
+              pathOptions={{
+                color: getColor(fire.confidence),
+                fillColor: getColor(fire.confidence),
+                fillOpacity: 0.7,
+                weight: 1,
+                className: isNew ? 'pulse-marker' : ''
+              }}
+            >
+              <Popup>
+                <div>
+                  <strong>🔥 Fire Detected</strong><br />
+                  Date: {fire.acquiredDate}<br />
+                  Time: {fire.acquiredTime}<br />
+                  Brightness: {fire.brightness}K<br />
+                  Confidence: {fire.confidence}<br />
+                  Satellite: {fire.satellite}
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
       </MapContainer>
     </div>
   );
