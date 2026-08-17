@@ -119,7 +119,8 @@ function Auth({ onLoginSuccess }) {
     setLoading(true);
     try {
       await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/reset-password`, {
-        token: resetCode,
+        email: forgotEmail,
+        code: resetCode,
         newPassword
       });
       setForgotMessage('');
@@ -136,7 +137,7 @@ function Auth({ onLoginSuccess }) {
   return (
     <div className="auth-overlay">
       <div className="auth-card">
-        {step === 'form' ? (
+        {step === 'form' && (
           <>
             <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
             <p className="auth-subtitle">
@@ -191,6 +192,12 @@ function Auth({ onLoginSuccess }) {
               </button>
             </form>
 
+            {isLogin && (
+              <p className="auth-forgot-link" onClick={() => { setStep('forgot'); setForgotMessage(''); }}>
+                Forgot Password?
+              </p>
+            )}
+
             <p className="auth-switch">
               {isLogin ? "Don't have an account? " : 'Already have an account? '}
               <span onClick={() => { setIsLogin(!isLogin); setError(''); }}>
@@ -198,7 +205,9 @@ function Auth({ onLoginSuccess }) {
               </span>
             </p>
           </>
-        ) : (
+        )}
+
+        {step === 'otp' && (
           <>
             <h2>Verify Your Email</h2>
             <p className="auth-subtitle">
@@ -229,6 +238,85 @@ function Auth({ onLoginSuccess }) {
               <span onClick={handleResendOtp}>
                 {resending ? 'Sending...' : 'Resend Code'}
               </span>
+            </p>
+          </>
+        )}
+
+        {step === 'forgot' && (
+          <>
+            <h2>Reset Password</h2>
+            <p className="auth-subtitle">Enter your email address and we'll send you a reset code.</p>
+
+            <form onSubmit={handleForgotPassword}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                required
+              />
+
+              {forgotMessage && <p className="auth-error">{forgotMessage}</p>}
+
+              <button type="submit" disabled={loading}>
+                {loading ? 'Sending...' : 'Send Reset Code'}
+              </button>
+            </form>
+
+            <p className="auth-switch">
+              <span onClick={() => { setStep('form'); setForgotMessage(''); }}>← Back to Sign In</span>
+            </p>
+          </>
+        )}
+
+        {step === 'reset' && (
+          <>
+            <h2>Enter Reset Code</h2>
+            <p className="auth-subtitle">
+              Check <strong>{forgotEmail}</strong> for a 6-digit code, then set your new password.
+            </p>
+
+            <form onSubmit={handleResetPassword}>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength="6"
+                placeholder="Enter 6-digit code"
+                value={resetCode}
+                onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))}
+                className="otp-input"
+                required
+              />
+              <input
+                type="password"
+                placeholder="New Password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
+              {newPassword && (
+                <div className="password-checklist">
+                  <span className={newPassword.length >= 8 ? 'check-item valid' : 'check-item'}>
+                    {newPassword.length >= 8 ? '✓' : '○'} At least 8 characters
+                  </span>
+                  <span className={/[A-Z]/.test(newPassword) ? 'check-item valid' : 'check-item'}>
+                    {/[A-Z]/.test(newPassword) ? '✓' : '○'} One uppercase letter
+                  </span>
+                  <span className={/[0-9]/.test(newPassword) ? 'check-item valid' : 'check-item'}>
+                    {/[0-9]/.test(newPassword) ? '✓' : '○'} One number
+                  </span>
+                </div>
+              )}
+
+              {forgotMessage && <p className="auth-error">{forgotMessage}</p>}
+
+              <button type="submit" disabled={loading || resetCode.length !== 6}>
+                {loading ? 'Resetting...' : 'Reset Password'}
+              </button>
+            </form>
+
+            <p className="auth-switch">
+              <span onClick={() => { setStep('form'); setIsLogin(true); setForgotMessage(''); }}>← Back to Sign In</span>
             </p>
           </>
         )}

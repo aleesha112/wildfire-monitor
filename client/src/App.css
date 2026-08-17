@@ -655,6 +655,19 @@ body {
   font-weight: 700;
 }
 
+.auth-forgot-link {
+  text-align: right;
+  color: #7a1f1f;
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: -8px;
+  margin-bottom: 4px;
+}
+
+.auth-forgot-link:hover {
+  text-decoration: underline;
+}
+
 /* ===== GAUGE (stats panel) ===== */
 .gauge-wrap {
   position: relative;
