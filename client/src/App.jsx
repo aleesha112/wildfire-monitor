@@ -11,6 +11,7 @@ import Auth from './components/Auth';
 import Watchlist from './components/Watchlist';
 import HistoricalSearch from './components/HistoricalSearch';
 import TimelapseSlider from './components/TimelapseSlider';
+import Methodology from './components/Methodology';
 
 function App() {
   const [fires, setFires] = useState([]);
@@ -18,6 +19,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [showLanding, setShowLanding] = useState(true);
+  const [showMethodology, setShowMethodology] = useState(false);
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('user');
@@ -111,6 +113,10 @@ function App() {
     return <Auth onLoginSuccess={setUser} />;
   }
 
+  if (showMethodology) {
+    return <Methodology onBack={() => setShowMethodology(false)} />;
+  }
+
   const displayFires = timelapseActive ? (timelapseFires || []) : (historicalFires || fires);
 
   return (
@@ -124,6 +130,7 @@ function App() {
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         timelapseActive={timelapseActive}
         onToggleTimelapse={() => setTimelapseActive(!timelapseActive)}
+        onShowMethodology={() => setShowMethodology(true)}
       />
       <div className="main-content">
         <aside className={sidebarOpen ? 'sidebar open' : 'sidebar'}>

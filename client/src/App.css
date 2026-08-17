@@ -1565,3 +1565,230 @@ body {
   color: #a39a90;
   flex-shrink: 0;
 }
+/* ===== METHODOLOGY PAGE ===== */
+.methodology-page {
+  min-height: 100vh;
+  background: #faf9f7;
+}
+
+.methodology-hero {
+  background: #1a1210;
+  padding: 50px 24px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.methodology-hero::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,138,61,0.15) 0%, transparent 70%);
+}
+
+.methodology-hero-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.methodology-back {
+  display: block;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 28px;
+  transition: color 0.2s ease;
+}
+
+.methodology-back:hover {
+  color: #FFFFFF;
+}
+
+.methodology-hero .landing-eyebrow {
+  color: #f0c8c0;
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.methodology-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  margin: 18px 0 16px;
+  line-height: 1.15;
+}
+
+.methodology-intro {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15.5px;
+  color: #c9beb8;
+  line-height: 1.65;
+  max-width: 560px;
+}
+
+.methodology-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 50px 24px 100px;
+  position: relative;
+  z-index: 3;
+}
+
+.method-section {
+  background: #FFFFFF;
+  border: 1px solid #eee8e4;
+  border-radius: 10px;
+  padding: 36px 40px;
+  margin-bottom: 24px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(92, 22, 22, 0.04);
+}
+
+.method-num {
+  position: absolute;
+  top: 20px;
+  right: 28px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 42px;
+  font-weight: 700;
+  color: #f4ece8;
+  line-height: 1;
+  user-select: none;
+}
+
+.method-section h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #7a1f1f;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.method-section > p {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  color: #4a453f;
+  line-height: 1.75;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.method-section ul {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.method-section li {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14.5px;
+  color: #4a453f;
+  line-height: 1.65;
+}
+
+.method-section li strong {
+  color: #2b2622;
+}
+
+.method-section code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  background: #faf0ee;
+  color: #7a1f1f;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.method-formula {
+  background: #faf9f7;
+  border: 1px solid #eee8e4;
+  border-left: 3px solid #7a1f1f;
+  border-radius: 6px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.method-formula strong {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #2b2622;
+  margin-bottom: 10px;
+}
+
+.method-formula p {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  color: #4a453f;
+  line-height: 1.65;
+  margin-bottom: 12px;
+}
+
+.method-formula p:last-child {
+  margin-bottom: 0;
+}
+
+.method-formula ul {
+  margin: 10px 0 0;
+}
+
+.method-formula pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  background: #1C1815;
+  color: #f5f1ea;
+  padding: 16px 18px;
+  border-radius: 6px;
+  overflow-x: auto;
+  line-height: 1.7;
+  margin: 12px 0;
+}
+
+.methodology-footnote {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #a39a90;
+  letter-spacing: 0.3px;
+  margin-top: 40px;
+  padding: 24px 40px 0;
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .methodology-title {
+    font-size: 28px;
+  }
+  .method-section {
+    padding: 28px 24px;
+  }
+  .method-num {
+    font-size: 30px;
+    top: 14px;
+    right: 20px;
+  }
+  .methodology-footnote {
+    padding: 24px 24px 0;
+  }
+}
