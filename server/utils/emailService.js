@@ -52,22 +52,24 @@ async function sendVerificationEmail(toEmail, name, code) {
   }
 }
 
-async function sendPasswordResetEmail(toEmail, name, resetUrl) {
+async function sendPasswordResetEmail(toEmail, name, code) {
   try {
     await transporter.sendMail({
       from: `"Wildfire Monitor" <${process.env.EMAIL_USER}>`,
       to: toEmail,
-      subject: 'Reset your Wildfire Monitor password',
+      subject: 'Your Wildfire Monitor password reset code',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
           <h2 style="color: #7a1f1f;">Password Reset Request</h2>
-          <p>Hi ${name}, we received a request to reset your password. Click below to set a new one:</p>
-          <a href="${resetUrl}" style="display: inline-block; background: #7a1f1f; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin: 16px 0;">Reset Password</a>
-          <p style="color: #888; font-size: 12px;">This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>
+          <p>Hi ${name}, use the code below to reset your password:</p>
+          <div style="background: #f4f2f0; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7a1f1f;">${code}</span>
+          </div>
+          <p style="color: #888; font-size: 12px;">This code expires in 15 minutes. If you didn't request this, you can ignore this email.</p>
         </div>
       `
     });
-    console.log(`✅ Password reset email sent to ${toEmail}`);
+    console.log(`✅ Password reset code sent to ${toEmail}`);
   } catch (error) {
     console.error('❌ Password reset email error:', error.message);
   }

@@ -6,11 +6,15 @@ function Auth({ onLoginSuccess }) {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState('form'); // 'form' | 'otp'
+  const [step, setStep] = useState('form'); // 'form' | 'otp' | 'forgot' | 'reset'
   const [otp, setOtp] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
   const [otpError, setOtpError] = useState('');
   const [resending, setResending] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotMessage, setForgotMessage] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -83,6 +87,49 @@ function Auth({ onLoginSuccess }) {
       setOtpError(err.response?.data?.error || 'Failed to resend code');
     } finally {
       setResending(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotMessage('');
+    setLoading(true);
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/forgot-password`, { email: forgotEmail });
+      setForgotMessage(res.data.message);
+      setStep('reset');
+    } catch (err) {
+      setForgotMessage(err.response?.data?.error || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setForgotMessage('');
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      setForgotMessage('Password must be at least 8 characters, with at least 1 uppercase letter and 1 number.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/reset-password`, {
+        token: resetCode,
+        newPassword
+      });
+      setForgotMessage('');
+      setStep('form');
+      setIsLogin(true);
+      setError('');
+    } catch (err) {
+      setForgotMessage(err.response?.data?.error || 'Reset failed');
+    } finally {
+      setLoading(false);
     }
   };
 

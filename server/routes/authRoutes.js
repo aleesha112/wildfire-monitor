@@ -152,49 +152,47 @@ router.post('/resend-otp', async (req, res) => {
   }
 });
 
-// FORGOT PASSWORD - request reset link
+// FORGOT PASSWORD - request reset code
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
 
-    // Always return success even if user not found, to avoid leaking which emails are registered
     if (!user) {
-      return res.json({ message: 'If that email is registered, a reset link has been sent.' });
+      return res.json({ message: 'If that email is registered, a reset code has been sent.' });
     }
 
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetToken = resetCode;
+    user.resetTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
     await user.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    await sendPasswordResetEmail(email, user.name, resetUrl);
+    await sendPasswordResetEmail(email, user.name, resetCode);
 
-    res.json({ message: 'If that email is registered, a reset link has been sent.' });
+    res.json({ message: 'If that email is registered, a reset code has been sent.' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
-// RESET PASSWORD - set new password using token
+// RESET PASSWORD - set new password using code
 router.post('/reset-password', async (req, res) => {
   try {
-    const { token, newPassword } = req.body;
+    const { email, code, newPassword } = req.body;
 
     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
     if (!passwordRegex.test(newPassword)) {
       return res.status(400).json({ error: 'Password must be at least 8 characters, with at least 1 uppercase letter and 1 number.' });
     }
 
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiry: { $gt: Date.now() }
-    });
+    const user = await User.findOne({ email });
+    if (!user || user.resetToken !== code) {
+      return res.status(400).json({ error: 'Invalid reset code' });
+    }
 
-    if (!user) {
-      return res.status(400).json({ error: 'Reset link is invalid or has expired.' });
+    if (Date.now() > user.resetTokenExpiry) {
+      return res.status(400).json({ error: 'Reset code has expired. Please request a new one.' });
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
