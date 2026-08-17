@@ -19,8 +19,13 @@ function App() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [showLanding, setShowLanding] = useState(true);
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      const savedUser = localStorage.getItem('user');
+      if (!savedUser || savedUser === 'undefined') return null;
+      return JSON.parse(savedUser);
+    } catch (e) {
+      return null;
+    }
   });
   const watchlistRef = useRef(null);
   const overviewRef = useRef(null);
