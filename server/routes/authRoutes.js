@@ -29,19 +29,20 @@ router.post('/signup', async (req, res) => {
 
     // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCodeExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
 
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
       isVerified: false,
-      verificationToken
+      verificationCode,
+      verificationCodeExpiry
     });
     await newUser.save();
 
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify?token=${verificationToken}`;
-    await sendVerificationEmail(email, name, verifyUrl);
+    await sendVerificationEmail(email, name, verificationCode);
 
     res.status(201).json({
       message: 'Signup successful! Please check your email to verify your account before logging in.'
@@ -90,24 +91,64 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// VERIFY EMAIL
-router.get('/verify', async (req, res) => {
+// VERIFY EMAIL WITH OTP CODE
+router.post('/verify-otp', async (req, res) => {
   try {
-    const { token } = req.query;
+    const { email, code } = req.body;
 
-    const user = await User.findOne({ verificationToken: token });
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: 'Invalid or expired verification link' });
+      return res.status(400).json({ error: 'User not found' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ error: 'Account is already verified' });
+    }
+
+    if (user.verificationCode !== code) {
+      return res.status(400).json({ error: 'Incorrect verification code' });
+    }
+
+    if (Date.now() > user.verificationCodeExpiry) {
+      return res.status(400).json({ error: 'Verification code has expired. Please request a new one.' });
     }
 
     user.isVerified = true;
-    user.verificationToken = undefined;
+    user.verificationCode = undefined;
+    user.verificationCodeExpiry = undefined;
     await user.save();
 
     res.json({ message: 'Email verified successfully! You can now log in.' });
   } catch (error) {
-    console.error('Verification error:', error);
+    console.error('OTP verification error:', error);
     res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+// RESEND VERIFICATION CODE
+router.post('/resend-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+    if (user.isVerified) {
+      return res.status(400).json({ error: 'Account is already verified' });
+    }
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.verificationCode = verificationCode;
+    user.verificationCodeExpiry = Date.now() + 15 * 60 * 1000;
+    await user.save();
+
+    await sendVerificationEmail(email, user.name, verificationCode);
+
+    res.json({ message: 'A new verification code has been sent to your email.' });
+  } catch (error) {
+    console.error('Resend OTP error:', error);
+    res.status(500).json({ error: 'Failed to resend code' });
   }
 });
 

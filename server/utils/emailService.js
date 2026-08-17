@@ -29,22 +29,24 @@ async function sendFireAlert(toEmail, regionName, fireCount, radiusKm) {
   }
 }
 
-async function sendVerificationEmail(toEmail, name, verifyUrl) {
+async function sendVerificationEmail(toEmail, name, code) {
   try {
     await transporter.sendMail({
       from: `"Wildfire Monitor" <${process.env.EMAIL_USER}>`,
       to: toEmail,
-      subject: 'Verify your Wildfire Monitor account',
+      subject: 'Your Wildfire Monitor verification code',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
           <h2 style="color: #7a1f1f;">Welcome, ${name}!</h2>
-          <p>Please verify your email address to activate your Wildfire Monitor account.</p>
-          <a href="${verifyUrl}" style="display: inline-block; background: #7a1f1f; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin: 16px 0;">Verify Email</a>
-          <p style="color: #888; font-size: 12px;">If you didn't create this account, you can ignore this email.</p>
+          <p>Use the code below to verify your email address:</p>
+          <div style="background: #f4f2f0; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7a1f1f;">${code}</span>
+          </div>
+          <p style="color: #888; font-size: 12px;">This code expires in 15 minutes. If you didn't create this account, you can ignore this email.</p>
         </div>
       `
     });
-    console.log(`✅ Verification email sent to ${toEmail}`);
+    console.log(`✅ Verification code sent to ${toEmail}`);
   } catch (error) {
     console.error('❌ Verification email error:', error.message);
   }
