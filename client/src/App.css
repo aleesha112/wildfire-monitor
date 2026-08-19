@@ -522,6 +522,20 @@ body {
   color: #7a1f1f;
 }
 
+.btn-icon-only {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .btn-full-text {
+    display: none;
+  }
+  .btn-icon-only {
+    display: inline;
+    font-size: 14px;
+  }
+}
+
 /* ===== AUTH SCREEN ===== */
 .auth-overlay {
   height: 100vh;
@@ -1295,6 +1309,20 @@ body {
     margin-left: auto;
   }
 
+  .header-right {
+    gap: 6px;
+  }
+
+  .navbar-timelapse-btn {
+    font-size: 10px;
+    padding: 5px 9px;
+    margin-right: 4px;
+  }
+
+  .app-header {
+    padding: 0 10px;
+  }
+
   /* Chatbot: smaller on tablet */
   .chat-widget {
     width: 300px;
@@ -1367,6 +1395,25 @@ body {
   .trend-chart-panel,
   .watchlist-panel {
     padding: 14px;
+  }
+
+  .navbar-timelapse-btn {
+    font-size: 0;
+    padding: 6px 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .navbar-timelapse-btn::before {
+    font-size: 13px;
+  }
+
+  .logout-btn {
+    font-size: 10px;
+    padding: 5px 9px;
   }
 }
 
