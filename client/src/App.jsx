@@ -120,7 +120,7 @@ function App() {
   const displayFires = timelapseActive ? (timelapseFires || []) : (historicalFires || fires);
 
   return (
-    <div className="app">
+    <div className={timelapseActive ? 'app timelapse-open' : 'app'}>
       <Header
         totalFires={displayFires.length}
         lastUpdated={lastUpdated}

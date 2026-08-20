@@ -196,6 +196,9 @@ function FireMap({ fires, riskZones, flyToRegion, isHistorical, historicalDate }
                 weight: 1,
                 className: isNew ? 'pulse-marker' : ''
               }}
+              eventHandlers={{
+                click: (e) => e.target.openPopup()
+              }}
             >
               <Popup>
                 <div>
