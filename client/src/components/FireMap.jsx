@@ -74,6 +74,19 @@ function FlyToRegion({ region, fires }) {
   return null;
 }
 
+function MapResizer() {
+  const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  return null;
+}
+
 function FireMap({ fires, riskZones, flyToRegion, isHistorical, historicalDate }){
   const [theme, setTheme] = useState('light');
   const [pakistanBoundary, setPakistanBoundary] = useState(null);
@@ -137,6 +150,7 @@ function FireMap({ fires, riskZones, flyToRegion, isHistorical, historicalDate }
           url={MAP_THEMES[theme].url}
           attribution={MAP_THEMES[theme].attribution}
         />
+        <MapResizer />
         <FlyToRegion region={flyToRegion} fires={fires} />
 
         {pakistanBoundary && (
