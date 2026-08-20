@@ -1370,10 +1370,6 @@ body {
     transform: translateX(-50%) !important;
   }
 
-  .app {
-    border-bottom: 4px solid #7a1f1f;
-  }
-
   .timelapse-panel {
     bottom: 150px;
     left: 12px;
