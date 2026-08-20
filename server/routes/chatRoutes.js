@@ -43,7 +43,7 @@ Answer the user's question using ONLY this data. Be concise (2-4 sentences), pro
         { role: 'system', content: contextPrompt },
         { role: 'user', content: question }
       ],
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
     });
 
     const answer = completion.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
